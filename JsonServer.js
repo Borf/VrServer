@@ -1,7 +1,22 @@
 ﻿net = require('net');
 var clients = [];
-
 var callbacks = {};
+
+
+function Response(socket)
+{
+	this.socket = socket;
+	this.send = function (id, data) {
+		var combined = { "id" : id, "data" : data };
+		data = JSON.stringify(combined);
+		buffer = new Buffer(4);
+		buffer.writeUInt32LE(data.length);
+		socket.write(buffer);
+		socket.write(data, 0, data.length, 'binary');
+	}
+	
+}
+
 
 exports.bind = function (name, callback) {
 	callbacks[name] = callback;	
@@ -22,8 +37,11 @@ exports.start = function (port) {
 				var len = new Buffer(socket.buffer, "binary").readUInt32LE(0);
 				if (socket.buffer.length >= 4 + len) {
 					var packet = JSON.parse(socket.buffer.slice(4, len + 4));
-					if (packet.hasOwnProperty("id") && callbacks.hasOwnProperty(packet.id))
-						callbacks[packet.id](packet, null);
+					if (packet.hasOwnProperty("id") && callbacks.hasOwnProperty(packet.id)) {
+						packet.socket = socket;
+						console.log("Got packet " + packet.id);
+						callbacks[packet.id](packet, new Response(socket));
+					}
 					else {
 						console.log("Got invalid packet");
 						if (packet.hasOwnProperty("id")) {
