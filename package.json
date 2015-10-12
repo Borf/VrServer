@@ -1,0 +1,10 @@
+{
+  "name": "VrServer",
+  "version": "0.0.0",
+  "description": "VrServer",
+  "main": "app.js",
+  "author": {
+    "name": "johan",
+    "email": ""
+  }
+}
