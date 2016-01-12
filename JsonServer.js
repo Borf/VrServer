@@ -1,6 +1,7 @@
 ﻿net = require('net');
 var clients = [];
 var callbacks = {};
+var closeCallback;
 
 
 function Response(socket)
@@ -22,6 +23,10 @@ exports.bind = function (name, callback) {
 	callbacks[name] = callback;	
 }
 
+exports.close = function(callback)
+{
+	closeCallback = callback;
+}
 
 exports.start = function (port) {
 	net.createServer(function (socket) {
@@ -57,14 +62,20 @@ exports.start = function (port) {
 			}
 		});
 		socket.on('end', function () {
+			if (closeCallback)
+				closeCallback(socket);
 			clients.splice(clients.indexOf(socket), 1);
 			console.log(socket.name + " Disconnected.\n");
 		});
 		socket.on('close', function () {
+			if (closeCallback)
+				closeCallback(socket);
 			clients.splice(clients.indexOf(socket), 1);
 			console.log(socket.name + " Closed.\n");
 		});
 		socket.on('error', function () {
+			if (closeCallback)
+				closeCallback(socket);
 			clients.splice(clients.indexOf(socket), 1);
 			console.log(socket.name + " Errored.\n");
 		});
@@ -79,3 +90,4 @@ exports.start = function (port) {
 
 	}).listen(port);
 }
+
