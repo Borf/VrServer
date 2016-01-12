@@ -20,7 +20,7 @@ function Session(data, socket) {
 		var combined = { "id" : id, "data" : data };
 		data = JSON.stringify(combined);
 		buffer = new Buffer(4);
-		buffer.writeUInt32LE(data.length);
+		buffer.writeUInt32LE(data.length,0);
 		socket.write(buffer);
 		socket.write(data, 0, data.length, 'binary');
 	}
