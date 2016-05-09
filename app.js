@@ -14,7 +14,7 @@ function Session(data, socket) {
 	this.data.lastping = moment().unix();
 	this.data.fps = [];
 	this.data.features = [];
-	this.data.tunnels = [];
+	this.tunnels = [];
 	this.socket = socket;
 	this.send = function (id, data) {
 		var combined = { "id" : id, "data" : data };
@@ -39,6 +39,7 @@ jsonServer.bind('session/report', function (req, res) {
 });
 
 jsonServer.bind('session/enable', function (req, res) {
+//	console.log("Got enable request for feature: " + req.data);
 	req.socket.session.data.features = req.socket.session.data.features.concat(req.data);
 	req.socket.session.data.features = req.socket.session.data.features.filter(function (item, pos) { return req.socket.session.data.features.indexOf(item) == pos });
 });
@@ -48,7 +49,19 @@ jsonServer.bind('session/list', function (req, res) {
 });
 
 jsonServer.close(function (socket) {
-	sessions.splice(sessions.indexOf(socket.session), 1);
+	for(var i = 0; i < sessions.length; i++)
+	{
+		var s = sessions[i];
+		for(var ii = 0; ii < s.tunnels.length; ii++)
+		{
+			if(s.tunnels[ii].other == socket.session)
+			{
+				s.tunnels.splice(ii, 1);
+			}
+		}
+	}
+	if(sessions.indexOf(socket.session) != -1)
+		sessions.splice(sessions.indexOf(socket.session), 1);
 });
 
 
@@ -60,12 +73,12 @@ jsonServer.bind('tunnel/create', function (req, res) {
 				console.log("Trying to create a tunnel to a session that does not support tunneling");
 				continue;
 			}
-			
+
 			var t =  {
 				"id" : uuid.v4(),
 				"other" : req.socket.session
 			};
-			s.data.tunnels.push(t);
+			s.tunnels.push(t);
 			s.send("tunnel/connect", { 'id' : t.id, "other" : req.socket.session.data.id });
 			console.log("Created tunnel :)");
 			res.send("tunnel/create", { 'status' : 'ok', 'id' : t.id });
@@ -79,8 +92,8 @@ jsonServer.bind('tunnel/create', function (req, res) {
 jsonServer.bind('tunnel/send', function (req, res) {
 	for (var i = 0; i < sessions.length; i++) {
 		var s = sessions[i];
-		for (var ii = 0; ii < s.data.tunnels.length; ii++) {
-			var t = s.data.tunnels[ii];
+		for (var ii = 0; ii < s.tunnels.length; ii++) {
+			var t = s.tunnels[ii];
 			if (t.id == req.data.dest) {
 				if (req.socket.session == s)
 					t.other.send('tunnel/send', { "id" : t.id, "data" : req.data.data });

@@ -44,7 +44,6 @@ exports.start = function (port) {
 					var packet = JSON.parse(socket.buffer.slice(4, len + 4));
 					if (packet.hasOwnProperty("id") && callbacks.hasOwnProperty(packet.id)) {
 						packet.socket = socket;
-						console.log("Got packet " + packet.id);
 						callbacks[packet.id](packet, new Response(socket));
 					}
 					else {
@@ -62,12 +61,16 @@ exports.start = function (port) {
 			}
 		});
 		socket.on('end', function () {
+			if(clients.indexOf(socket) < 0)
+				return;
 			if (closeCallback)
 				closeCallback(socket);
+			console.log(socket.name + " Disconnected. (index " + clients.indexOf(socket) + ")\n");
 			clients.splice(clients.indexOf(socket), 1);
-			console.log(socket.name + " Disconnected.\n");
 		});
 		socket.on('close', function () {
+			if(clients.indexOf(socket) < 0)
+				return;
 			if (closeCallback)
 				closeCallback(socket);
 			clients.splice(clients.indexOf(socket), 1);
