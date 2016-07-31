@@ -26,6 +26,17 @@ function Session(data, socket) {
 	}
 };
 
+
+function sendSocket(socket, id, data)
+{
+	var combined = { "id" : id, "data" : data };
+	data = JSON.stringify(combined);
+	buffer = new Buffer(4);
+	buffer.writeUInt32LE(data.length, 0);
+	socket.write(buffer);
+	socket.write(data, 0, data.length, 'binary');
+}
+
 jsonServer.bind('session/start', function (req, res) {
 	var session = new Session(req.data, res.socket);
 	req.socket.session = session;
@@ -49,19 +60,28 @@ jsonServer.bind('session/list', function (req, res) {
 });
 
 jsonServer.close(function (socket) {
-	for(var i = 0; i < sessions.length; i++)
-	{
-		var s = sessions[i];
-		for(var ii = 0; ii < s.tunnels.length; ii++)
-		{
-			if(s.tunnels[ii].other == socket.session)
-			{
-				s.tunnels.splice(ii, 1);
-			}
-		}
-	}
+	console.log("Cleaning up tunnels");
+
+	if (socket.session && socket.session.tunnels)
+		for (var i = 0; i < socket.session.tunnels.length; i++)
+			sendSocket(socket.session.tunnels[i].other, "tunnel/close", { 'id' : socket.session.tunnels[i].id });
+
 	if(sessions.indexOf(socket.session) != -1)
 		sessions.splice(sessions.indexOf(socket.session), 1);
+
+	for (var i = 0; i < jsonServer.clients.length; i++) {
+		if (jsonServer.clients[i].session) {
+			var s = jsonServer.clients[i].session;
+			for (var ii = 0; ii < s.tunnels.length; ii++) {
+				if (s.tunnels[ii].other == socket) {
+					s.tunnels.splice(ii, 1);
+					console.log("Cleaned up a tunnel...");
+				}
+			}
+
+		}
+	}
+
 });
 
 
@@ -76,16 +96,16 @@ jsonServer.bind('tunnel/create', function (req, res) {
 
 			var t =  {
 				"id" : uuid.v4(),
-				"other" : req.socket.session
+				"other" : req.socket
 			};
 			s.tunnels.push(t);
-			s.send("tunnel/connect", { 'id' : t.id, "other" : req.socket.session.data.id });
+			s.send("tunnel/connect", { 'id' : t.id });
 			console.log("Created tunnel :)");
 			res.send("tunnel/create", { 'status' : 'ok', 'id' : t.id });
 			return;
 		}
 	}
-	console.log("Session not found");
+	console.log("Session with id '" + req.data.session + "' not found");
 	res.send("tunnel/create", { 'status' : 'error' });
 });
 
@@ -96,7 +116,7 @@ jsonServer.bind('tunnel/send', function (req, res) {
 			var t = s.tunnels[ii];
 			if (t.id == req.data.dest) {
 				if (req.socket.session == s)
-					t.other.send('tunnel/send', { "id" : t.id, "data" : req.data.data });
+					sendSocket(t.other, 'tunnel/send', { "id" : t.id, "data" : req.data.data });
 				else
 					s.send('tunnel/send', { "id" : t.id, "data" : req.data.data });
 
