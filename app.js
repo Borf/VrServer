@@ -15,6 +15,7 @@ function Session(data, socket) {
 	this.data.fps = [];
 	this.data.features = [];
 	this.tunnels = [];
+	this.tunnelkey = "";
 	this.socket = socket;
 	this.send = function (id, data) {
 		var combined = { "id" : id, "data" : data };
@@ -53,6 +54,10 @@ jsonServer.bind('session/enable', function (req, res) {
 //	console.log("Got enable request for feature: " + req.data);
 	req.socket.session.data.features = req.socket.session.data.features.concat(req.data);
 	req.socket.session.data.features = req.socket.session.data.features.filter(function (item, pos) { return req.socket.session.data.features.indexOf(item) == pos });
+	if (req.key) {
+		console.log("Enabling tunnel key");
+		req.socket.session.tunnelkey = req.key;
+	}
 });
 
 jsonServer.bind('session/list', function (req, res) {
@@ -92,6 +97,12 @@ jsonServer.bind('tunnel/create', function (req, res) {
 			if (s.data.features.indexOf("tunnel") < 0) {
 				console.log("Trying to create a tunnel to a session that does not support tunneling");
 				continue;
+			}
+			if (s.tunnelkey != '') {
+				if (!req.data.key || req.data.key != s.tunnelkey) {
+					console.log("Trying to create a tunnel with an invalid key");
+					continue;
+				}
 			}
 
 			var t =  {

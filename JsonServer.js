@@ -44,7 +44,7 @@ exports.start = function (port) {
 				if (socket.buffer.length >= 4 + len) {
 					var packet = JSON.parse(socket.buffer.slice(4, len + 4));
 					if (packet.hasOwnProperty("id") && callbacks.hasOwnProperty(packet.id)) {
-						console.log("Got packet " + packet.id + "\n");
+						//console.log("Got packet " + packet.id + "\n");
 						packet.socket = socket;
 						callbacks[packet.id](packet, new Response(socket));
 					}
