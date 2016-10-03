@@ -101,6 +101,9 @@ jsonServer.bind('tunnel/create', function (req, res) {
 			if (s.tunnelkey != '') {
 				if (!req.data.key || req.data.key != s.tunnelkey) {
 					console.log("Trying to create a tunnel with an invalid key");
+					console.log("Tunnelkey = " + s.tunnelkey);
+					if(req.data.key)
+						console.log("Key tried = " + req.data.key);
 					continue;
 				}
 			}

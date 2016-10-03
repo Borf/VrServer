@@ -42,7 +42,14 @@ exports.start = function (port) {
 			while (socket.buffer.length >= 4) {
 				var len = new Buffer(socket.buffer, "binary").readUInt32LE(0);
 				if (socket.buffer.length >= 4 + len) {
+					try {
 					var packet = JSON.parse(socket.buffer.slice(4, len + 4));
+					} catch(e)
+					{
+						console.log("Error parsing json...closing");
+						console.log(socket.buffer.slice(4,len+4));
+					    break;
+					}
 					if (packet.hasOwnProperty("id") && callbacks.hasOwnProperty(packet.id)) {
 						//console.log("Got packet " + packet.id + "\n");
 						packet.socket = socket;
