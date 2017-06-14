@@ -2,27 +2,27 @@ const Router = require('express').Router;
 const router = new Router();
 const path = require('path');
 const express = require('express');
+const _ = require('lodash');
 
 let versions = [
     'v1'
 ];
 
 let endpoints = [
-    'students',
+    
     'sessions',
-    'projects'
+    'projects',
+    'students'
 ];
 
 _.forEach(versions, function(version) {
     let basePath = '/' + version + '/';
     let baseRouterPath = './' + version + '/';
 
-    router.use(basePath + 'auth', require(baseRouterPath + 'auth'));
-
     _.forEach(endpoints, function(endpoint) {
         endpoint = endpoint.replace(/y\b/, "ie");
 
-        let path = basePath + endpoint + 's';
+        let path = basePath + endpoint;
         let routerPath = baseRouterPath + endpoint;
 
         router.use(path, require(routerPath));

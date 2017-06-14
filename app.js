@@ -178,10 +178,6 @@ app.get('/availableApplications', function (req, res) {
 //    res.send(req.body); //use req.body for getting post json data
 //});
 
-require('./api/oauth')(app);
-require('./api/sessions')(app);
-require('./api/students')(app);
-
 var server = app.listen(1337, function () {
 	var host = server.address().address;
 	var port = server.address().port;

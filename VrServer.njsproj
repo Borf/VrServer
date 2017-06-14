@@ -35,6 +35,19 @@
     <Compile Include="api\students.js" />
     <Compile Include="app.js" />
     <Compile Include="JsonServer.js" />
+    <Compile Include="routes.js" />
+    <Compile Include="v1\projects\controller.js" />
+    <Compile Include="v1\projects\index.js" />
+    <Compile Include="v1\projects\model.js" />
+    <Compile Include="v1\projects\schema.js" />
+    <Compile Include="v1\sessions\controller.js" />
+    <Compile Include="v1\sessions\index.js" />
+    <Compile Include="v1\sessions\model.js" />
+    <Compile Include="v1\sessions\schema.js" />
+    <Compile Include="v1\students\controller.js" />
+    <Compile Include="v1\students\index.js" />
+    <Compile Include="v1\students\model.js" />
+    <Compile Include="v1\students\schema.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="views\authorized.html" />
@@ -49,6 +62,10 @@
     <Folder Include="typings\globals\node\" />
     <Folder Include="typings\globals\underscore\" />
     <Folder Include="typings\globals\uuid\" />
+    <Folder Include="v1\" />
+    <Folder Include="v1\projects\" />
+    <Folder Include="v1\sessions\" />
+    <Folder Include="v1\students\" />
     <Folder Include="views\" />
   </ItemGroup>
   <ItemGroup>
