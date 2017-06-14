@@ -142,7 +142,6 @@ jsonServer.bind('tunnel/send', function (req, res) {
 });
 
 
-
 jsonServer.start(6666);
 console.log("server running at port 6666\n");
 
@@ -150,9 +149,62 @@ console.log("server running at port 6666\n");
 
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var upload = multer();
+var request = require('request');
+
+//activate libraries
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.get('/', function (req, res) {
 	res.json(sessions.map(function (s) { return s.data; } ));
 });
+
+//API and web server calls
+
+// Home page for oauth
+app.get('/oauth', function (req, res) {
+    getOAuthToken(res); //
+    //res.sendFile(path.join(__dirname + '/views/index.html'));
+});
+
+// callback for auth
+
+app.get('/callback', function (req, res) {
+    res.sendFile(path.join(__dirname + '/views/authorized.html')); //sendfile sends html page
+});
+
+app.get('/validateLogin', function (req, res) {
+    res.send('not implemented yet');  //send sends plain text
+});
+
+app.get('/availableApplications', function (req, res) {
+    res.send('not implemented yet');
+});
+
+//post request
+app.post('/sendReports', upload.array(), function (req, res, next) {
+    res.send(req.body); //use req.body for getting post json data
+});
+
+//get all students using mysql server check 
+app.get('/allStudents', function (req, res) {
+    res.send('not implemented yet');
+});
+
+//get all sessions using mysql server
+app.get('/allSessions', function (req, res) {
+    res.send('not implemented yet');
+});
+
+//get all sessions by student number
+app.get('/sessionsByStudent', function (req, res) {
+    res.send('not implemented yet');
+});
+
 
 var server = app.listen(1337, function () {
 	var host = server.address().address;
