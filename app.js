@@ -153,12 +153,15 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
 var request = require('request');
-var path = require("path");
+const path = require("path");
+const routes = require('./routes');
 
 //activate libraries
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/', routes);
 
 app.get('/', function (req, res) {
 	res.json(sessions.map(function (s) { return s.data; } ));
