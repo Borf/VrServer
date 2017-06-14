@@ -153,6 +153,7 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
 var request = require('request');
+var path = require("path");
 
 //activate libraries
 
@@ -165,46 +166,18 @@ app.get('/', function (req, res) {
 
 //API and web server calls
 
-// Home page for oauth
-app.get('/oauth', function (req, res) {
-    getOAuthToken(res); //
-    //res.sendFile(path.join(__dirname + '/views/index.html'));
-});
-
-// callback for auth
-
-app.get('/callback', function (req, res) {
-    res.sendFile(path.join(__dirname + '/views/authorized.html')); //sendfile sends html page
-});
-
-app.get('/validateLogin', function (req, res) {
-    res.send('not implemented yet');  //send sends plain text
-});
-
 app.get('/availableApplications', function (req, res) {
     res.send('not implemented yet');
 });
 
-//post request
-app.post('/sendReports', upload.array(), function (req, res, next) {
-    res.send(req.body); //use req.body for getting post json data
-});
+////post request
+//app.post('/sendReports', upload.array(), function (req, res, next) {
+//    res.send(req.body); //use req.body for getting post json data
+//});
 
-//get all students using mysql server check 
-app.get('/allStudents', function (req, res) {
-    res.send('not implemented yet');
-});
-
-//get all sessions using mysql server
-app.get('/allSessions', function (req, res) {
-    res.send('not implemented yet');
-});
-
-//get all sessions by student number
-app.get('/sessionsByStudent', function (req, res) {
-    res.send('not implemented yet');
-});
-
+require('./api/oauth')(app);
+require('./api/sessions')(app);
+require('./api/students')(app);
 
 var server = app.listen(1337, function () {
 	var host = server.address().address;
@@ -212,3 +185,62 @@ var server = app.listen(1337, function () {
 	
 	console.log('Webserver at http://%s:%s', host, port);
 });
+
+///* optioneel / toekomst */
+//v1 / projects /
+//@GET
+//[
+//    {
+//        project_id: "string",
+//        title: "string",
+//        url: "string",
+//        desc: "string",
+//        icon: "string"
+//    }
+//]
+//v1 / projects / id
+//@GET(project_id)
+//{
+//    project_id: "string",
+//        title: "string",
+//            url: "string",
+//                desc: "string",
+//                    icon: "string",
+//                        updates : [ 	//nullable
+//                            {
+//                                date: "string",
+//                                title: "string",
+//                                desc: "string",
+//                                image_url: "" //nullable
+//                            }
+//                        ]
+//}
+
+//v1 / projects / update / add
+//@POST({
+//    date: "string",
+//    title: "string",
+//    desc: "string",
+//    image_url: "" //nullable
+//})
+//{
+//    "OK"
+//}
+
+//v1 / projects / add
+//@POST({
+//    project_id: "string",
+//    title: "string",
+//    url: "string",
+//    desc: "string",
+//    icon: "string"
+//})
+//{
+//    "OK"
+//}
+
+//v1 / projects / remove
+//@POST(project_id)
+//{
+//    "OK"
+//}

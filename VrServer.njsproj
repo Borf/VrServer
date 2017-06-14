@@ -30,6 +30,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="api\oauth.js" />
+    <Compile Include="api\sessions.js" />
+    <Compile Include="api\students.js" />
     <Compile Include="app.js" />
     <Compile Include="JsonServer.js" />
     <Content Include="package.json" />
@@ -38,9 +41,11 @@
     <Content Include="views\index.html" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="api\" />
     <Folder Include="typings\" />
     <Folder Include="typings\globals\" />
     <Folder Include="typings\globals\moment\" />
+    <Folder Include="typings\globals\mongoose\" />
     <Folder Include="typings\globals\node\" />
     <Folder Include="typings\globals\underscore\" />
     <Folder Include="typings\globals\uuid\" />
@@ -48,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="typings\globals\moment\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\mongoose\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\node\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\underscore\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\uuid\index.d.ts" />
