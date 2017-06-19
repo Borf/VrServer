@@ -9,6 +9,10 @@ var AnswerSchema = new Schema(
 		type: String,
 		required: true
 	},
+	name: {
+		type: String,
+		required: true
+	},
 	answer: {
 		type: String,
 		required: true
@@ -18,3 +22,5 @@ var AnswerSchema = new Schema(
 		required:true
 	}
 });
+
+module.exports = AnswerSchema;

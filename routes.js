@@ -12,7 +12,8 @@ let endpoints = [
     'answers',
     'sessions',
     'projects',
-    'students'
+    'students',
+    'updates'
 ];
 
 _.forEach(versions, function(version) {
