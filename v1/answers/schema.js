@@ -3,19 +3,18 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-var StudentSchema = new Schema({
-	name: {
+var AnswerSchema = new Schema(
+{
+	session_id: {
+		type: String,
+		required: true
+	}
+	answer: {
 		type: String,
 		required: true
 	},
-	student_nr: {
+	correct_answer: {
 		type: String,
-		unique: true,
-		required: true
-	},
-	profile_image: {
-		type: String
+		required:true
 	}
 });
-
-module.exports = StudentSchema;

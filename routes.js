@@ -9,7 +9,7 @@ let versions = [
 ];
 
 let endpoints = [
-    
+    'answers',
     'sessions',
     'projects',
     'students'

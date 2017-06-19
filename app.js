@@ -155,6 +155,7 @@ var upload = multer();
 var request = require('request');
 const path = require("path");
 const routes = require('./routes');
+const mongoose = require('mongoose');
 
 //activate libraries
 
@@ -167,6 +168,8 @@ app.get('/', function (req, res) {
 	res.json(sessions.map(function (s) { return s.data; } ));
 });
 
+mongoose.connect('mongodb://student:dnGKV2wn@145.48.6.10:27017/mixedreality');
+mongoose.set('debug', true);
 //API and web server calls
 
 app.get('/availableApplications', function (req, res) {
@@ -184,62 +187,3 @@ var server = app.listen(1337, function () {
 	
 	console.log('Webserver at http://%s:%s', host, port);
 });
-
-///* optioneel / toekomst */
-//v1 / projects /
-//@GET
-//[
-//    {
-//        project_id: "string",
-//        title: "string",
-//        url: "string",
-//        desc: "string",
-//        icon: "string"
-//    }
-//]
-//v1 / projects / id
-//@GET(project_id)
-//{
-//    project_id: "string",
-//        title: "string",
-//            url: "string",
-//                desc: "string",
-//                    icon: "string",
-//                        updates : [ 	//nullable
-//                            {
-//                                date: "string",
-//                                title: "string",
-//                                desc: "string",
-//                                image_url: "" //nullable
-//                            }
-//                        ]
-//}
-
-//v1 / projects / update / add
-//@POST({
-//    date: "string",
-//    title: "string",
-//    desc: "string",
-//    image_url: "" //nullable
-//})
-//{
-//    "OK"
-//}
-
-//v1 / projects / add
-//@POST({
-//    project_id: "string",
-//    title: "string",
-//    url: "string",
-//    desc: "string",
-//    icon: "string"
-//})
-//{
-//    "OK"
-//}
-
-//v1 / projects / remove
-//@POST(project_id)
-//{
-//    "OK"
-//}

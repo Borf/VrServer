@@ -27,7 +27,8 @@ var ProjectSchema = new Schema(
 {
 	project_id: {
 		type: String,
-		required: true
+		required: true,
+		unique: true
 	},
 	title: {
 		type: String,
