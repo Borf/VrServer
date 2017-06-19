@@ -31,11 +31,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="api\oauth.js" />
-    <Compile Include="api\sessions.js" />
-    <Compile Include="api\students.js" />
     <Compile Include="app.js" />
     <Compile Include="JsonServer.js" />
     <Compile Include="routes.js" />
+    <Compile Include="v1\oauth\controller.js" />
+    <Compile Include="v1\oauth\index.js" />
     <Compile Include="v1\projects\controller.js" />
     <Compile Include="v1\projects\index.js" />
     <Compile Include="v1\projects\model.js" />
@@ -63,6 +63,7 @@
     <Folder Include="typings\globals\underscore\" />
     <Folder Include="typings\globals\uuid\" />
     <Folder Include="v1\" />
+    <Folder Include="v1\oauth\" />
     <Folder Include="v1\projects\" />
     <Folder Include="v1\sessions\" />
     <Folder Include="v1\students\" />
