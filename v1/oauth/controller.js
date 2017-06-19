@@ -1,7 +1,7 @@
-﻿
-    var path = require("path");
-    var express = require("express");
-    var oauthSignature = require("oauth-signature");
+﻿var request = require('request');
+var path = require("path");
+var express = require("express");
+var oauthSignature = require("oauth-signature");
 
     // Home page for oauth
     exports.index = function (req, res) {
@@ -12,6 +12,7 @@
     // callback for auth
 
     exports.callback = function (req, res) {
+
         res.sendFile(path.resolve('./views/authorized.html')); //sendfile sends html page
     }
 
@@ -19,14 +20,14 @@
         res.send('not implemented yet');  //send sends plain text
     }
 
-    //oauth function pls ignore everything from here and below
+    //oauth function
     function getOAuthToken(res) {
         var baseURL = 'https://publicapi.avans.nl/oauth/request_token';
         var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
         var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
-        var callback = 'http://127.0.0.1:8080/callback';
-        var nonce = 'Du0x1J'; //generateNonce();
-        var timestamp = 1496756772; //Math.floor(new Date() / 1000);
+        var callback = 'http://127.0.0.1:1337/v1/oauth/callback';
+        var nonce = generateNonce();
+        var timestamp = Math.floor(new Date() / 1000);
         var signMethod = 'HMAC-SHA1';
         var parameters = {
             oauth_consumer_key: key,
@@ -44,12 +45,34 @@
         //parameters.push({ parameter: 'oauth_signature_method', value: signMethod });
         //parameters.push({ parameter: 'oauth_version', value: '1.0' });
         var signature = oauthSignature.generate('GET', baseURL, parameters, secret, token, { encodeSignature: false });//generateSignature(parameters, 'GET', baseURL, secret, token);
-        res.send(signature);
-        //var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
-        //    '&oauth_nonce=' + nonce + '&oauth_version=1.0&oauth_signature=' + signature + '&oauth_callback=' + callback);
-        //request.get(url, function (error, response, body) {
-        //    res.send(body);
-        //});
+        //res.send(signature);
+        var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
+            '&oauth_nonce=' + nonce + '&oauth_version=1.0&oauth_signature=' + signature + '&oauth_callback=' + callback);
+        request.get(url, function (error, response, body) {
+            console.log(body);
+            redirect(body, res);
+        });
+    }
+
+    //redirect to oauth page using data found in the api
+    function redirect(data, res) {
+        var oauthData = {};
+        var oauthToken;
+        var parameters = data.split('&');
+        for (var i = 0; i < parameters.length; i++) {
+            pair = parameters[i].split('=');
+            oauthData[pair[0]] = pair[1];
+        }
+        if (oauthData != undefined && oauthData.hasOwnProperty('oauth_problem')) {
+            res.send('oauth failed: ' + data);
+        }
+        else if (oauthData != undefined) {
+
+            res.redirect('https://publicapi.avans.nl/oauth/saml.php?oauth_token=' + oauthData.oauth_token);
+        }
+        else {
+            res.send('internal server error');
+        }
     }
 
     function generateNonce() {
@@ -67,6 +90,7 @@
         return iets;
     }
 
+    //currently using the oauth-signature library instead of this function
     function generateSignature(parameters, method, url, consumerSecret, tokenSecret) {
         parameters.sort(custom_compare);
 
