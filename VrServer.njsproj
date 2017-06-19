@@ -30,9 +30,60 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="api\oauth.js" />
     <Compile Include="app.js" />
+    <Compile Include="JsonServer.js" />
+    <Compile Include="lib\error.handler.js" />
+    <Compile Include="lib\success.handler.js" />
+    <Compile Include="routes.js" />
+    <Compile Include="v1\answers\controller.js" />
+    <Compile Include="v1\answers\index.js" />
+    <Compile Include="v1\answers\model.js" />
+    <Compile Include="v1\answers\schema.js" />
+    <Compile Include="v1\oauth\controller.js" />
+    <Compile Include="v1\oauth\index.js" />
+    <Compile Include="v1\projects\controller.js" />
+    <Compile Include="v1\projects\index.js" />
+    <Compile Include="v1\projects\model.js" />
+    <Compile Include="v1\projects\schema.js" />
+    <Compile Include="v1\sessions\controller.js" />
+    <Compile Include="v1\sessions\index.js" />
+    <Compile Include="v1\sessions\model.js" />
+    <Compile Include="v1\sessions\schema.js" />
+    <Compile Include="v1\students\controller.js" />
+    <Compile Include="v1\students\index.js" />
+    <Compile Include="v1\students\model.js" />
+    <Compile Include="v1\students\schema.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="views\authorized.html" />
+    <Content Include="views\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="api\" />
+    <Folder Include="lib\" />
+    <Folder Include="typings\" />
+    <Folder Include="typings\globals\" />
+    <Folder Include="typings\globals\moment\" />
+    <Folder Include="typings\globals\mongoose\" />
+    <Folder Include="typings\globals\node\" />
+    <Folder Include="typings\globals\underscore\" />
+    <Folder Include="typings\globals\uuid\" />
+    <Folder Include="v1\" />
+    <Folder Include="v1\answers\" />
+    <Folder Include="v1\oauth\" />
+    <Folder Include="v1\projects\" />
+    <Folder Include="v1\sessions\" />
+    <Folder Include="v1\students\" />
+    <Folder Include="views\" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="typings\globals\moment\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\mongoose\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\node\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\underscore\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\uuid\index.d.ts" />
+    <TypeScriptCompile Include="typings\index.d.ts" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

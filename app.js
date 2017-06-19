@@ -142,7 +142,6 @@ jsonServer.bind('tunnel/send', function (req, res) {
 });
 
 
-
 jsonServer.start(6666);
 console.log("server running at port 6666\n");
 
@@ -150,9 +149,37 @@ console.log("server running at port 6666\n");
 
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var upload = multer();
+var request = require('request');
+const path = require("path");
+const routes = require('./routes');
+const mongoose = require('mongoose');
+const config = require('config');
+
+//activate libraries
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/', routes);
+
 app.get('/', function (req, res) {
 	res.json(sessions.map(function (s) { return s.data; } ));
 });
+
+mongoose.connect(config.MONGO_CONFIG);
+mongoose.set('debug', false);
+
+app.get('/availableApplications', function (req, res) {
+    res.send('not implemented yet');
+});
+
+////post request
+//app.post('/sendReports', upload.array(), function (req, res, next) {
+//    res.send(req.body); //use req.body for getting post json data
+//});
 
 var server = app.listen(1337, function () {
 	var host = server.address().address;
