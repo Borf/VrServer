@@ -8,7 +8,7 @@ var AnswerSchema = new Schema(
 	session_id: {
 		type: String,
 		required: true
-	}
+	},
 	answer: {
 		type: String,
 		required: true

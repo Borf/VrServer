@@ -15,10 +15,10 @@ exports.findBySessionId = function(req, res) {
 }
 
 exports.create = function(req, res) {
-    Session
+    Answer
         .create(req.body)
-        .then(function(session) {
-            SuccessHandler.handle(res, 201, session);
+        .then(function(answers) {
+            SuccessHandler.handle(res, 201, answers);
         }, function(error) {
             ErrorHandler.handle(res, error, 422);
         });
