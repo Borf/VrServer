@@ -1,4 +1,9 @@
-﻿var request = require('request');
+﻿const _ = require('lodash');
+const ErrorHandler = require('../../lib/error.handler');
+const SuccessHandler = require('../../lib/success.handler');
+const User = require('./model')
+
+var request = require('request');
 var path = require("path");
 var express = require("express");
 var oauthSignature = require("oauth-signature");
@@ -12,8 +17,36 @@ var oauthSignature = require("oauth-signature");
     // callback for auth
 
     exports.callback = function (req, res) {
-
-        res.sendFile(path.resolve('./views/authorized.html')); //sendfile sends html page
+        // get the access token
+        var oauth_token = req.query.oauth_token; //token vanuit saml
+        var oauth_verifier = req.query.oauth_verifier; //verifier vanuit saml
+        var baseURL = 'https://publicapi.avans.nl/oauth/access_token';
+        var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
+        var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
+        var timestamp = Math.floor(new Date() / 1000);
+        var nonce = generateNonce();
+        var signMethod = 'HMAC-SHA1';
+        var parameters = {
+            oauth_consumer_key: key,
+            oauth_nonce: nonce,
+            oauth_timestamp: timestamp,
+            oauth_signature_method: signMethod,
+            oauth_token: oauth_token,
+            oauth_verifier: oauth_verifier,
+            oauth_version: '1.0'
+        };
+        var signature = oauthSignature.generate('GET', baseURL, parameters, secret, '', { encodeSignature: false });
+        var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
+            '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token + '&oauth_verifier=' + oauth_verifier);
+        request.get(url, function (error, response, body) {
+            if (body.startsWith("oauth_problem")) {
+                console.log(body);
+                res.send(body);
+            }
+            else {
+                res.sendFile(path.resolve('./views/authorized.html')); //sendfile sends html page
+            }
+        });
     }
 
     exports.validateLogin = function (req, res) {

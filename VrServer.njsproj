@@ -42,6 +42,8 @@
     <Compile Include="v1\answers\schema.js" />
     <Compile Include="v1\oauth\controller.js" />
     <Compile Include="v1\oauth\index.js" />
+    <Compile Include="v1\oauth\model.js" />
+    <Compile Include="v1\oauth\schema.js" />
     <Compile Include="v1\projects\controller.js" />
     <Compile Include="v1\projects\index.js" />
     <Compile Include="v1\projects\model.js" />
