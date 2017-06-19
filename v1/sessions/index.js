@@ -6,8 +6,9 @@ const express = require('express');
 var router = express.Router();
 
 router.get('/', controller.findAll);
-router.get('/studentnr', controller.findAllByStudentId);
-router.post('/add', controller.add);
-router.delete('/remove', controller.remove);
+router.get('/id', controller.findById);
+router.get('/studentnr', controller.findByStudentNr);
+router.post('/add', controller.create);
+router.delete('/remove', controller.destroy);
 
 module.exports = router;
