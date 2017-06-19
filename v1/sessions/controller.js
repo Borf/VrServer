@@ -31,20 +31,20 @@ exports.findById = function(req, res) {
             ErrorHandler.handle(res, error, 404);
         });
 }
-// /*TODO: find how to search for nested object ids*/
-// exports.findByStudentNr = function(req, res) {
-//     Session.find({
-//             student_nr : req.query.student_nr
-//         })
-//         .then(function(sessions) {
-//             if (!sessions) {
-//                 return ErrorHandler.handle(res, new Error('Not found'), 404);
-//             }
-//             SuccessHandler.handle(res, 200, sessions);
-//         }, function(error) {
-//             ErrorHandler.handle(res, error, 404);
-//         });
-// }
+/*TODO: find how to search for nested object ids*/
+exports.findByStudentNr = function(req, res) {
+    Session.find({
+            student_nr : req.query.student_nr
+        })
+        .then(function(sessions) {
+            if (!sessions) {
+                return ErrorHandler.handle(res, new Error('Not found'), 404);
+            }
+            SuccessHandler.handle(res, 200, sessions);
+        }, function(error) {
+            ErrorHandler.handle(res, error, 404);
+        });
+}
 
 /*TO-DO: expand by using server date */
 

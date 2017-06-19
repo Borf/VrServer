@@ -13,6 +13,7 @@ let endpoints = [
     'sessions',
     'projects',
     'students',
+    'updates',
     'oauth'
 ];
 
