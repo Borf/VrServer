@@ -21,6 +21,9 @@ var AnswerSchema = new Schema(
 		type: String,
 		required:true
 	}
+	image_url: {
+		type: String
+	}
 });
 
 module.exports = AnswerSchema;
