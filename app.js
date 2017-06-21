@@ -145,7 +145,7 @@ jsonServer.bind('tunnel/send', function (req, res) {
 jsonServer.start(6666);
 console.log("server running at port 6666\n");
 
-
+//VrServer API implementation
 
 var express = require('express');
 var app = express();
@@ -176,10 +176,7 @@ app.get('/availableApplications', function (req, res) {
     res.send('not implemented yet');
 });
 
-////post request
-//app.post('/sendReports', upload.array(), function (req, res, next) {
-//    res.send(req.body); //use req.body for getting post json data
-//});
+//activate server
 
 var server = app.listen(1337, function () {
 	var host = server.address().address;

@@ -20,7 +20,7 @@ var AnswerSchema = new Schema(
 	correct_answer: {
 		type: String,
 		required:true
-	}
+	},
 	image_url: {
 		type: String
 	}

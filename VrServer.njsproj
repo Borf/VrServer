@@ -30,7 +30,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="api\oauth.js" />
     <Compile Include="app.js" />
     <Compile Include="JsonServer.js" />
     <Compile Include="lib\error.handler.js" />
@@ -56,13 +55,16 @@
     <Compile Include="v1\students\index.js" />
     <Compile Include="v1\students\model.js" />
     <Compile Include="v1\students\schema.js" />
+    <Compile Include="v1\updates\controller.js" />
+    <Compile Include="v1\updates\index.js" />
+    <Compile Include="v1\updates\model.js" />
+    <Compile Include="v1\updates\schema.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="views\authorized.html" />
     <Content Include="views\index.html" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="api\" />
     <Folder Include="lib\" />
     <Folder Include="typings\" />
     <Folder Include="typings\globals\" />
@@ -77,6 +79,7 @@
     <Folder Include="v1\projects\" />
     <Folder Include="v1\sessions\" />
     <Folder Include="v1\students\" />
+    <Folder Include="v1\updates\" />
     <Folder Include="views\" />
   </ItemGroup>
   <ItemGroup>

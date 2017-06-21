@@ -8,6 +8,7 @@ let versions = [
     'v1'
 ];
 
+//folders to redirect the api to (when adding a new folder, add it to this list)
 let endpoints = [
     'answers',
     'sessions',
@@ -17,6 +18,7 @@ let endpoints = [
     'oauth'
 ];
 
+//loops through the endpoints
 _.forEach(versions, function(version) {
     let basePath = '/' + version + '/';
     let baseRouterPath = './' + version + '/';

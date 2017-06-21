@@ -8,7 +8,7 @@ var SessionSchema = new Schema(
 	student_name: {
 		type: String,
 		required: true
-	}
+	},
 	student_id: {
 		type: String,
 		required: true
