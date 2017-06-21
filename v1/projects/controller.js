@@ -1,4 +1,4 @@
-const _ = require('lodash');
+ const _ = require('lodash');
 const ErrorHandler = require('../../lib/error.handler');
 const SuccessHandler = require('../../lib/success.handler');
 const Project = require('./model')

@@ -10,6 +10,8 @@ var path = require("path");
 var express = require("express");
 var oauthSignature = require("oauth-signature");
 
+var tokenSecret = '';
+
     // Home page for oauth
     exports.index = function (req, res) {
         getOAuthToken(res); //
@@ -37,7 +39,7 @@ var oauthSignature = require("oauth-signature");
             oauth_verifier: oauth_verifier,
             oauth_version: '1.0'
         };
-        var signature = oauthSignature.generate('GET', baseURL, parameters, secret, '', { encodeSignature: false }); //generates a signature using the oauth-signature library
+        var signature = oauthSignature.generate('GET', baseURL, parameters, secret, tokenSecret, { encodeSignature: false }); //generates a signature using the oauth-signature library
         var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
             '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token + '&oauth_verifier=' + oauth_verifier); //create url with required parameters
         request.get(url, function (error, response, body) { //request access token
@@ -46,6 +48,8 @@ var oauthSignature = require("oauth-signature");
                 res.send(body);
             }
             else {
+                var accessData = parseURLToJSON(body);
+                console.log(getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token));
                 res.sendFile(path.resolve('./views/authorized.html')); //sendfile sends html page
             }
         });
@@ -53,6 +57,29 @@ var oauthSignature = require("oauth-signature");
 
     exports.validateLogin = function (req, res) {
         res.send('not implemented yet');  //send sends plain text
+    }
+
+    function getAvansAPIData(baseURL, token_secret, oauth_token) {
+        var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
+        var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
+        var timestamp = Math.floor(new Date() / 1000);  //parses latest datetime to a timestamp
+        var nonce = generateNonce();
+        var signMethod = 'HMAC-SHA1';
+        //list with parameters required for generating a signature
+        var parameters = {
+            oauth_consumer_key: key,
+            oauth_nonce: nonce,
+            oauth_timestamp: timestamp,
+            oauth_signature_method: signMethod,
+            oauth_token: oauth_token,
+            oauth_version: '1.0'
+        };
+        var signature = oauthSignature.generate('GET', baseURL, parameters, secret, token_secret, { encodeSignature: false }); //generates a signature using the oauth-signature library
+        var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
+            '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token); //create url with required parameters
+        request.get(url, function (error, response, body) { //request access token
+            return body;
+        });
     }
 
     //oauth function
@@ -82,20 +109,36 @@ var oauthSignature = require("oauth-signature");
         //get request_token and redirect to avans login page
         request.get(url, function (error, response, body) {
             console.log(body);
+            data = parseURLToJSON(body);
+            tokenSecret = data.oauth_token_secret;
+            var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret };
+            User
+                .create()
+                .then(function (user) {
+                    SuccessHandler.handle(res, 201, user._id);
+                }, function (error) {
+                    ErrorHandler.handle(res, error, 422);
+                });
             redirect(body, res);
         });
     }
 
-    //redirect to oauth page using data found in the api
-    function redirect(data, res) {
+    //parses url encoded strings to json objects
+    function parseURLToJSON(string) {
         var oauthData = {};
         var oauthToken;
-        var parameters = data.split('&');
+        var parameters = string.split('&');
         //loop through and parse parameters
         for (var i = 0; i < parameters.length; i++) {
             pair = parameters[i].split('=');
             oauthData[pair[0]] = pair[1];
         }
+        return oauthData;
+    }
+
+    //redirect to oauth page using data found in the api
+    function redirect(data, res) {
+        oauthData = parseURLToJSON(data);
         if (oauthData != undefined && oauthData.hasOwnProperty('oauth_problem')) { //return oauth failed when failed
             res.send('oauth failed: ' + data);
         }
