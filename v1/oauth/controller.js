@@ -49,7 +49,8 @@ var tokenSecret = '';
             }
             else {
                 var accessData = parseURLToJSON(body);
-                console.log(getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token));
+                var studentData = getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token);
+                console.log(studentData);
                 res.sendFile(path.resolve('./views/authorized.html')); //sendfile sends html page
             }
         });
@@ -78,6 +79,7 @@ var tokenSecret = '';
         var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
             '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token); //create url with required parameters
         request.get(url, function (error, response, body) { //request access token
+            console.log(body);
             return body;
         });
     }
@@ -112,13 +114,10 @@ var tokenSecret = '';
             data = parseURLToJSON(body);
             tokenSecret = data.oauth_token_secret;
             var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret };
-            User
-                .create()
-                .then(function (user) {
-                    SuccessHandler.handle(res, 201, user._id);
-                }, function (error) {
-                    ErrorHandler.handle(res, error, 422);
-                });
+            User.create(userJson, function (err, userJson) {
+                if (err) return handleError(err);
+                // saved!
+            })
             redirect(body, res);
         });
     }

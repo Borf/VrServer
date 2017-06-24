@@ -13,9 +13,6 @@ var UserSchema = new Schema(
             type: String,
             required: true
         },
-        verifyToken: {
-            type: String,
-        },
         token_secret: {
             type: String,
             required: false
