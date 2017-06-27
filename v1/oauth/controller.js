@@ -10,8 +10,6 @@ var path = require("path");
 var express = require("express");
 var oauthSignature = require("oauth-signature");
 
-var tokenSecret = '';
-
     // Home page for oauth
     exports.index = function (req, res) {
         getOAuthToken(res); //
@@ -20,47 +18,80 @@ var tokenSecret = '';
 
     // callback for oauth
     exports.callback = function (req, res) {
-        // get the access token
-        var oauth_token = req.query.oauth_token; //token returned from saml
-        var oauth_verifier = req.query.oauth_verifier; //verifier returned from saml
-        var baseURL = 'https://publicapi.avans.nl/oauth/access_token';
-        var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
-        var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
-        var timestamp = Math.floor(new Date() / 1000);  //parses latest datetime to a timestamp
-        var nonce = generateNonce();
-        var signMethod = 'HMAC-SHA1';
-        //list with parameters required for generating a signature
-        var parameters = {
-            oauth_consumer_key: key,
-            oauth_nonce: nonce,
-            oauth_timestamp: timestamp,
-            oauth_signature_method: signMethod,
-            oauth_token: oauth_token,
-            oauth_verifier: oauth_verifier,
-            oauth_version: '1.0'
-        };
-        var signature = oauthSignature.generate('GET', baseURL, parameters, secret, tokenSecret, { encodeSignature: false }); //generates a signature using the oauth-signature library
-        var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
-            '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token + '&oauth_verifier=' + oauth_verifier); //create url with required parameters
-        request.get(url, function (error, response, body) { //request access token
-            if (body.startsWith("oauth_problem")) { //return error when oauth failed
-                console.log(body);
-                res.send(body);
-            }
-            else {
-                var accessData = parseURLToJSON(body);
-                var studentData = getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token);
-                console.log(studentData);
-                res.sendFile(path.resolve('./views/authorized.html')); //sendfile sends html page
-            }
-        });
+        User.findOne({
+            token: req.query.oauth_token
+        })
+            .then(function (user) {
+                if (!user) {
+                    return ErrorHandler.handle(res, new Error('Not found'), 404);
+                }
+                // get the access token
+                var oauth_token = req.query.oauth_token; //token returned from saml
+                var oauth_verifier = req.query.oauth_verifier; //verifier returned from saml
+                var baseURL = 'https://publicapi.avans.nl/oauth/access_token';
+                var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
+                var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
+                var timestamp = Math.floor(new Date() / 1000);  //parses latest datetime to a timestamp
+                var nonce = generateNonce();
+                var signMethod = 'HMAC-SHA1';
+                //list with parameters required for generating a signature
+                var parameters = {
+                    oauth_consumer_key: key,
+                    oauth_nonce: nonce,
+                    oauth_timestamp: timestamp,
+                    oauth_signature_method: signMethod,
+                    oauth_token: oauth_token,
+                    oauth_verifier: oauth_verifier,
+                    oauth_version: '1.0'
+                };
+                var signature = oauthSignature.generate('GET', baseURL, parameters, secret, user.token_secret, { encodeSignature: false }); //generates a signature using the oauth-signature library
+                var url = (baseURL + '?oauth_consumer_key=' + key + '&oauth_signature_method=' + signMethod + '&oauth_timestamp=' + timestamp +
+                    '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token + '&oauth_verifier=' + oauth_verifier); //create url with required parameters
+                request.get(url, function (error, response, body) { //request access token
+                    if (body.startsWith("oauth_problem")) { //return error when oauth failed
+                        console.log(body);
+                        res.send(body);
+                    }
+                    else {
+                        var accessData = parseURLToJSON(body);
+                        getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token, function (studentString) {
+                            console.log(studentString);
+                            if (studentString.startsWith("oauth_problem")) {
+                                res.send(studentString);
+                            }
+                            else {
+                                var studentData = JSON.parse(studentString);
+                                User.findOne({ studentnr: studentData[0].studentnr }, function (err, doc) {
+                                    doc.username = studentData[0].inlognaam;
+                                    doc.studentnr = studentData[0].studentnummer;
+                                    doc.token = oauth_token;
+                                    doc.token_secret = user.token_secret;
+                                    doc.user_id = '1';
+                                    doc.save();
+                                    res.sendFile(path.resolve('./views/authorized.html'));
+                                });
+                                var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret, studentnr: studentData[0].studentnummer, username: studentData[0].inlognaam };
+                                User
+                                    .create(userJson)
+                                    .then(function (user) {
+                                        res.sendFile(path.resolve('./views/authorized.html'));
+                                    }, function (error) {
+                                        ErrorHandler.handle(res, error, 422);
+                                    });
+                            }
+                        });
+                    }
+                });
+            }, function (error) {
+                ErrorHandler.handle(res, error, 404);
+            });
     }
 
     exports.validateLogin = function (req, res) {
         res.send('not implemented yet');  //send sends plain text
     }
 
-    function getAvansAPIData(baseURL, token_secret, oauth_token) {
+    function getAvansAPIData(baseURL, token_secret, oauth_token, callback) {
         var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
         var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
         var timestamp = Math.floor(new Date() / 1000);  //parses latest datetime to a timestamp
@@ -80,7 +111,7 @@ var tokenSecret = '';
             '&oauth_nonce=' + nonce + '&oauth_signature=' + signature + '&oauth_version=1.0&oauth_token=' + oauth_token); //create url with required parameters
         request.get(url, function (error, response, body) { //request access token
             console.log(body);
-            return body;
+            callback(body);
         });
     }
 
@@ -112,13 +143,14 @@ var tokenSecret = '';
         request.get(url, function (error, response, body) {
             console.log(body);
             data = parseURLToJSON(body);
-            tokenSecret = data.oauth_token_secret;
             var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret };
-            User.create(userJson, function (err, userJson) {
-                if (err) return handleError(err);
-                // saved!
-            })
-            redirect(body, res);
+            User
+                .create(userJson)
+                .then(function (user) {
+                    redirect(body, res);
+                }, function (error) {
+                    ErrorHandler.handle(res, error, 422);
+                });
         });
     }
 

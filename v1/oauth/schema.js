@@ -16,6 +16,14 @@ var UserSchema = new Schema(
         token_secret: {
             type: String,
             required: false
+        },
+        username: {
+            type: String,
+        },
+        studentnr: {
+            type: Number,
         }
 
     });
+
+module.exports = UserSchema;
