@@ -54,32 +54,39 @@ var oauthSignature = require("oauth-signature");
                     }
                     else {
                         var accessData = parseURLToJSON(body);
-                        getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token, function (studentString) {
-                            console.log(studentString);
-                            if (studentString.startsWith("oauth_problem")) {
-                                res.send(studentString);
-                            }
-                            else {
-                                var studentData = JSON.parse(studentString);
-                                User.findOne({ studentnr: studentData[0].studentnr }, function (err, doc) {
-                                    doc.username = studentData[0].inlognaam;
-                                    doc.studentnr = studentData[0].studentnummer;
-                                    doc.token = oauth_token;
-                                    doc.token_secret = user.token_secret;
-                                    doc.user_id = '1';
-                                    doc.save();
-                                    res.sendFile(path.resolve('./views/authorized.html'));
+                        var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret };
+                        User
+                            .create(userJson)
+                            .then(function (user) {
+                                getAvansAPIData("https://publicapi.avans.nl/oauth/studentnummer/", accessData.oauth_token_secret, accessData.oauth_token, function (studentString) {
+                                    console.log(studentString);
+                                    if (studentString.startsWith("oauth_problem")) {
+                                        res.send(studentString);
+                                    }
+                                    else {
+                                        var studentData = JSON.parse(studentString);
+                                        User.findOne({ studentnr: studentData[0].studentnr }, function (err, doc) {
+                                            doc.username = studentData[0].inlognaam;
+                                            doc.studentnr = studentData[0].studentnummer;
+                                            doc.token = oauth_token;
+                                            doc.token_secret = user.token_secret;
+                                            doc.user_id = '1';
+                                            doc.save();
+                                            res.send('Authorization complete oauth_token: ' + doc.token); //res.sendFile(path.resolve('./views/authorized.html'));
+                                        });
+                                        var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret, studentnr: studentData[0].studentnummer, username: studentData[0].inlognaam };
+                                        User
+                                            .create(userJson)
+                                            .then(function (user) {
+                                                res.send('Authorization complete oauth_token: ' + doc.token); //res.sendFile(path.resolve('./views/authorized.html'));
+                                            }, function (error) {
+                                                ErrorHandler.handle(res, error, 422);
+                                            });
+                                    }
                                 });
-                                var userJson = { user_id: 1, token: data.oauth_token, token_secret: data.oauth_token_secret, studentnr: studentData[0].studentnummer, username: studentData[0].inlognaam };
-                                User
-                                    .create(userJson)
-                                    .then(function (user) {
-                                        res.sendFile(path.resolve('./views/authorized.html'));
-                                    }, function (error) {
-                                        ErrorHandler.handle(res, error, 422);
-                                    });
-                            }
-                        });
+                            }, function (error) {
+                                ErrorHandler.handle(res, error, 422);
+                            });
                     }
                 });
             }, function (error) {
@@ -88,7 +95,9 @@ var oauthSignature = require("oauth-signature");
     }
 
     exports.validateLogin = function (req, res) {
-        res.send('not implemented yet');  //send sends plain text
+        User.findOne({ token: req.query.oauth_token }, function (err, doc) {
+            res.send({ studentnr: doc.studentnr });
+        });
     }
 
     function getAvansAPIData(baseURL, token_secret, oauth_token, callback) {

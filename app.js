@@ -156,7 +156,7 @@ var request = require('request');
 const path = require("path");
 const routes = require('./routes');
 const mongoose = require('mongoose');
-const config = require('config');
+//const config = require('config');
 
 //activate libraries
 
@@ -169,7 +169,7 @@ app.get('/', function (req, res) {
 	res.json(sessions.map(function (s) { return s.data; } ));
 });
 
-mongoose.connect(config.MONGO_CONFIG);
+mongoose.connect('mongodb://127.0.0.1:27017/mixedreality');
 mongoose.set('debug', false);
 
 app.get('/availableApplications', function (req, res) {
