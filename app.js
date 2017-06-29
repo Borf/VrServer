@@ -169,7 +169,7 @@ app.get('/', function (req, res) {
 	res.json(sessions.map(function (s) { return s.data; } ));
 });
 
-mongoose.connect('mongodb://127.0.0.1:27017/mixedreality');
+mongoose.connect('mongodb://student:dnGKV2wn@145.48.6.10:27017/mixedreality');
 mongoose.set('debug', false);
 
 app.get('/availableApplications', function (req, res) {
