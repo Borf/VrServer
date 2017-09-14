@@ -39,10 +39,10 @@ function sendSocket(socket, id, data)
 }
 
 jsonServer.bind('session/start', function (req, res) {
-	var session = new Session(req.data, res.socket);
-	req.socket.session = session;
+	var s = new Session(req.data, res.socket);
+	req.socket.session = s;
 	session.socket = req.socket;
-	sessions.push(session);
+	sessions.push(s);
 	res.send("session/start", "ok");
 });
 
@@ -148,6 +148,11 @@ console.log("server running at port 6666\n");
 
 
 var express = require('express');
+var morgan = require('morgan');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var FileStore = require('session-file-store')(session);
+
 var app = express();
 var bodyParser = require('body-parser');
 var multer = require('multer');
@@ -156,10 +161,19 @@ var request = require('request');
 const path = require("path");
 const routes = require('./routes');
 const mongoose = require('mongoose');
-const config = require('config');
+const config = require('./config');
 
 //activate libraries
-
+app.use(morgan('short'));
+app.use(cookieParser());
+app.use(session({
+	name : 'connect.sid',
+	secret: "asdasd",
+	resave: true,
+	store: new FileStore(),
+	saveUninitialized: false,
+	cookie: { secure : false, httpOnly : false }
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
