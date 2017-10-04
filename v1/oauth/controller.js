@@ -7,6 +7,10 @@ var querystring = require("querystring");
 var key = '17f48ee9e866d30bd4f4bdbce3f5e2c7b292ddab';
 var secret = '6ab1750c99cfdaf73d6c198f3e9a4a3511ff15a2';
 var signMethod = 'HMAC-SHA1';
+var uuid = require('uuid');
+
+
+var sessions = [];
 
 
     // Home page for oauth
@@ -63,16 +67,39 @@ exports.callback = function (req, res) {
 exports.finishLogin = function (req, res) {
 	callApi("https://publicapi.avans.nl/oauth/people/@me", req.session, function (data) {
 		if (data) {
-			var data = {};
-			data.sessionid = 12345;
+			var session = {
+				id : uuid.v4(),
+				key : uuid.v1(),
+				name : data.name.formatted,
+				email : data.emails[0],
+				login : data.id
+			}
+			
+			var loginData = {};
+			loginData.sessionid = session.id;
+			loginData.key = session.key;
+
 			res.type("text/plain");
-			res.send(data);
+			res.send(loginData);
+			sessions.push(session);
 		}
 		else
 			res.send("something went wrong");
 	});
+}
+
+exports.confirm = function (req, res) {
+	console.log(req.body);
+	console.log(sessions);
+	for (var i in sessions) {
+		if (sessions[i].id == req.body.sessionid && sessions[i].key == req.body.key && sessions[i].key != "") {
+			res.send(sessions[i]);
+			sessions[i].key = "";
+			return;
+		}
+	}
 	
-	
+	res.send("Error");
 }
 
 exports.validateLogin = function (req, res) {
