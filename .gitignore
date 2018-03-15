@@ -1,2 +1,7 @@
 .ntvs_analysis.dat
 node_modules/
+
+# Eslint
+.eslintrc.js
+.eslintrc.json
+.eslintrc.yaml
