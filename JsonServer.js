@@ -48,7 +48,7 @@ exports.start = function (port) {
                     {
                         console.log('Error parsing json...closing');
                         console.log(socket.buffer.slice(4,len+4));
-					    break;
+                        break;
                     }
                     if (packet.hasOwnProperty('id') && callbacks.hasOwnProperty(packet.id)) {
                         //console.log("Got packet " + packet.id + "\n");
@@ -85,11 +85,11 @@ exports.start = function (port) {
             clients.splice(clients.indexOf(socket), 1);
             console.log(socket.name + ' Closed.\n');
         });
-        socket.on('error', function () {
+        socket.on('error', function (error) {
+            console.log(socket.name + ' Errored.\n');
             if (closeCallback)
                 closeCallback(socket);
             clients.splice(clients.indexOf(socket), 1);
-            console.log(socket.name + ' Errored.\n');
         });
 		
         function broadcast(message, sender) {
