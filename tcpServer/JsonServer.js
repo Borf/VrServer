@@ -1,22 +1,9 @@
 ﻿const net = require('net');
+const Response = require('./Response');
+
 var clients = [];
 var callbacks = {};
-var closeCallback;
-
-
-class Response {
-    constructor (socket) {
-        this.socket = socket;
-        this.send = function (id, data) {
-            var combined = { 'id' : id, 'data' : data };
-            data = JSON.stringify(combined);
-            let buffer = new Buffer(4);
-            buffer.writeUInt32LE(data.length,0);
-            socket.write(buffer);
-            socket.write(data, 0, data.length, 'binary');
-        };
-    }
-}
+let closeCallbacks = [];
 
 exports.clients = clients;
 
@@ -26,7 +13,7 @@ exports.bind = function (name, callback) {
 
 exports.close = function(callback)
 {
-    closeCallback = callback;
+    closeCallbacks.push(callback);
 };
 
 exports.start = function (port) {
@@ -35,7 +22,7 @@ exports.start = function (port) {
         socket.buffer = '';
         socket.setEncoding('binary');
         clients.push(socket);
-        console.log(socket.name + ' Connected.\n');
+        console.log(socket.name + ' Connected.');
 		
         socket.on('data', function (data) {
             socket.buffer += data;
@@ -70,36 +57,38 @@ exports.start = function (port) {
             }
         });
         socket.on('end', function () {
-            if(clients.indexOf(socket) < 0)
-                return;
-            if (closeCallback)
-                closeCallback(socket);
+            if(clients.indexOf(socket) < 0) return;
+            closeCallbacks.forEach((callback) => {
+                callback(socket);
+            });
             console.log(socket.name + ' Disconnected. (index ' + clients.indexOf(socket) + ')\n');
             clients.splice(clients.indexOf(socket), 1);
         });
         socket.on('close', function () {
-            if(clients.indexOf(socket) < 0)
-                return;
-            if (closeCallback)
-                closeCallback(socket);
+            if(clients.indexOf(socket) < 0) return;
+            closeCallbacks.forEach((callback) => {
+                callback(socket);
+            });
             clients.splice(clients.indexOf(socket), 1);
             console.log(socket.name + ' Closed.\n');
         });
         socket.on('error', function (error) {
             console.log(socket.name + ' Errored.\n');
-            if (closeCallback)
-                closeCallback(socket);
+            closeCallbacks.forEach((callback) => {
+                callback(socket);
+            });
             clients.splice(clients.indexOf(socket), 1);
         });
 		
-        function broadcast(message, sender) {
-            clients.forEach(function (client) {
-                if (client === sender) return;
-                client.write(message);
-            });
-            process.stdout.write(message);
-        }
-
+        
     }).listen(port);
 };
 
+exports.broadcast = function broadcast(message, sender) {
+    clients.forEach(function (client) {
+        if (client === sender) return;
+
+        let response = new Response(client);
+        response.sendData(message);
+    });
+};

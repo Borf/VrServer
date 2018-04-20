@@ -1,33 +1,34 @@
-exports.start = function (sessions) {
-    var moment = require('moment');
-    var jsonServer = require('./JsonServer.js');
-    var _ = require('underscore');
-    var uuid = require('uuid');
+const uuid = require('uuid');
+const moment = require('moment');
+const mpServer = require('./crimeSceneMultiplayer/multiplayerServer');
+let jsonServer = require('./JsonServer');
 
-    class Session {
-        constructor (data, socket) {
-            this.data = {};
-            this.data.clientinfo = data;
-            this.data.id = uuid.v4();
-            this.data.startTime = moment().unix();
-            this.data.endTime = 0;
-            this.data.lastping = moment().unix();
-            this.data.fps = [];
-            this.data.features = [];
-            this.tunnels = [];
-            this.tunnelkey = '';
-            this.socket = socket;
-            this.send = function (id, data) {
-                var combined = { 'id' : id, 'data' : data };
-                data = JSON.stringify(combined);
-                let buffer = new Buffer(4);
-                buffer.writeUInt32LE(data.length,0);
-                socket.write(buffer);
-                socket.write(data, 0, data.length, 'binary');
-            };
-        }
+
+class Session {
+    constructor (data, socket) {
+        this.data = {};
+        this.data.clientinfo = data;
+        this.data.id = uuid.v4();
+        this.data.startTime = moment().unix();
+        this.data.endTime = 0;
+        this.data.lastping = moment().unix();
+        this.data.fps = [];
+        this.data.features = [];
+        this.tunnels = [];
+        this.tunnelkey = '';
+        this.socket = socket;
+        this.send = function (id, data) {
+            var combined = { 'id' : id, 'data' : data };
+            data = JSON.stringify(combined);
+            let buffer = new Buffer(4);
+            buffer.writeUInt32LE(data.length,0);
+            socket.write(buffer);
+            socket.write(data, 0, data.length, 'binary');
+        };
     }
+}
 
+exports.start = function (sessions) {
     function sendSocket(socket, id, data) {
         var combined = { 'id' : id, 'data' : data };
         data = JSON.stringify(combined);
@@ -66,10 +67,6 @@ exports.start = function (sessions) {
     jsonServer.close(function (socket) {
         // throw new Error('sadsda');
         console.log('Cleanng up tunnels');
-
-        if (socket.session && socket.session.tunnels)
-            for (let i = 0; i < socket.session.tunnels.length; i++)
-                sendSocket(socket.session.tunnels[i].other, 'tunnel/close', { 'id' : socket.session.tunnels[i].id });
 
         if(sessions.indexOf(socket.session) != -1)
             sessions.splice(sessions.indexOf(socket.session), 1);
@@ -126,11 +123,18 @@ exports.start = function (sessions) {
             var s = sessions[i];
             for (var ii = 0; ii < s.tunnels.length; ii++) {
                 var t = s.tunnels[ii];
+
+                if (req.broadcast) {
+                    jsonServer.broadcast(req.data, req.socket);
+                    return;
+                }
+
                 if (t.id == req.data.dest) {
-                    if (req.socket.session == s)
+                    if (req.socket.session == s) {
                         sendSocket(t.other, 'tunnel/send', { 'id' : t.id, 'data' : req.data.data });
-                    else
+                    } else {
                         s.send('tunnel/send', { 'id' : t.id, 'data' : req.data.data });
+                    }
 
                     return;
                 }
@@ -139,6 +143,8 @@ exports.start = function (sessions) {
         console.log('Could not find tunnel ' + req.data.dest);
     });
 
+    // Start the crimeScene multiplayer server
+    mpServer.start(sessions, jsonServer);
 
     jsonServer.start(6666);
     console.log('server running at port 6666\n');
