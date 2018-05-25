@@ -1,4 +1,4 @@
-const NO_LOG = '-no--log';
+const NO_LOG = '--no-log';
 
 // The logger object which will be returned to from the module.
 let Logger = {
