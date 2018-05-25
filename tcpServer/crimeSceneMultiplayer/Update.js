@@ -6,7 +6,7 @@ module.exports = class Update {
         this.count = data.count;
         this.objects = [];
         this.requestNum = data.requestNumber;
-        this._deserializePlayerPos(data);
+        this._deserializePlayerData(data);
         this._deserializeObjects(data);
     }
 
@@ -14,11 +14,17 @@ module.exports = class Update {
         return this.client.id;
     }
 
-    _deserializePlayerPos(raw) {
+    _deserializePlayerData(raw) {
         let buff = Buffer.from(raw.playerPosition, 'base64');
-        let posArray = [];
+        let posArray = [0, 0, 0];
         for (let i = 0; i < 3; i++) {
-            posArray.push(buff.readFloatLE(i * 4));
+            posArray[i] = buff.readFloatLE(i * 4);
+        }
+
+        let buffRot = Buffer.from(raw.playerRot, 'base64');
+        let rotArray = [0, 0, 0, 0];
+        for (let i = 0; i < 4; i++) {
+            rotArray[i] = buffRot.readFloatLE(i * 4);
         }
 
         this.playerPosition = posArray;
