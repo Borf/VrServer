@@ -1,4 +1,5 @@
-const Node = require('./Node');
+const Node = require("./Node");
+const Logger = require("./logger")();
 
 module.exports = class Update {
     constructor(client, data) {
@@ -6,6 +7,8 @@ module.exports = class Update {
         this.count = data.count;
         this.objects = [];
         this.requestNum = data.requestNumber;
+        this.playerPosition = [0, 0, 0];
+        this.playerRotation = [0, 0, 0, 0];
         this._deserializePlayerData(data);
         this._deserializeObjects(data);
     }
@@ -15,41 +18,49 @@ module.exports = class Update {
     }
 
     _deserializePlayerData(raw) {
-        let buff = Buffer.from(raw.playerPosition, 'base64');
-        let posArray = [0, 0, 0];
-        for (let i = 0; i < 3; i++) {
-            posArray[i] = buff.readFloatLE(i * 4);
+        try {
+            let buff = Buffer.from(raw.playerPosition, "base64");
+            for (let i = 0; i < 3; i++) {
+                this.playerPosition[i] = buff.readFloatLE(i * 4);
+            }
+        } catch (error) {
+            Logger.log(`Failed to get player position: ${error}`);
         }
 
-        let buffRot = Buffer.from(raw.playerRot, 'base64');
-        let rotArray = [0, 0, 0, 0];
-        for (let i = 0; i < 4; i++) {
-            rotArray[i] = buffRot.readFloatLE(i * 4);
+        try {
+            let buffRot = Buffer.from(raw.playerRot, "base64");
+            for (let i = 0; i < 4; i++) {
+                this.playerRotation[i] = buffRot.readFloatLE(i * 4);
+            }
+        } catch (error) {
+            Logger.log(`Failed to get player rotation: ${error}`);
         }
-
-        this.playerPosition = posArray;
     }
 
     _deserializeObjects(raw) {
-        let buff = Buffer.from(raw.objects, 'base64');
+        let buff = Buffer.from(raw.objects, "base64");
 
         for (let objIndex = 0; objIndex < this.count; objIndex++) {
-            // One object is 32 bytes
-            let id = buff.readInt32LE(objIndex * 32);
-            let pos = [0, 0, 0];
-            let rot = [0, 0, 0, 0];
+            try {
+                // One object is 32 bytes
+                let id = buff.readInt32LE(objIndex * 32);
+                let pos = [0, 0, 0];
+                let rot = [0, 0, 0, 0];
 
-            // rotation (4 floats = 16 bytes)
-            for (let i = 0; i < 4; i++) {
-                rot[i] = buff.readFloatLE(objIndex * 32 + 4);
+                // rotation (4 floats = 16 bytes)
+                for (let i = 0; i < 4; i++) {
+                    rot[i] = buff.readFloatLE(objIndex * 32 + 4);
+                }
+
+                // pos (3 floats = 12 bytes)
+                for (let i = 0; i < 3; i++) {
+                    pos[i] = buff.readFloatLE(objIndex * 32 + 20);
+                }
+
+                this.objects.push(new Node(id, pos, rot));
+            } catch (error) {
+                Logger.log(`failed to get object: ${error}`);
             }
-
-            // pos (3 floats = 12 bytes)
-            for (let i = 0; i < 3; i++) {
-                pos[i] = buff.readFloatLE(objIndex * 32 + 20);
-            }
-
-            this.objects.push(new Node(id, pos, rot));
         }
     }
 };
