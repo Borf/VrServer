@@ -28,7 +28,7 @@ module.exports = class Update {
         }
 
         try {
-            let buffRot = Buffer.from(raw.playerRot, "base64");
+            let buffRot = Buffer.from(raw.playerRotation, "base64");
             for (let i = 0; i < 4; i++) {
                 this.playerRotation[i] = buffRot.readFloatLE(i * 4);
             }
@@ -49,12 +49,12 @@ module.exports = class Update {
 
                 // rotation (4 floats = 16 bytes)
                 for (let i = 0; i < 4; i++) {
-                    rot[i] = buff.readFloatLE(objIndex * 32 + 4);
+                    rot[i] = buff.readFloatLE((objIndex * 32) + 4 + (i * 4));
                 }
 
                 // pos (3 floats = 12 bytes)
                 for (let i = 0; i < 3; i++) {
-                    pos[i] = buff.readFloatLE(objIndex * 32 + 20);
+                    pos[i] = buff.readFloatLE((objIndex * 32) + 20 + (i * 4));
                 }
 
                 this.objects.push(new Node(id, pos, rot));
