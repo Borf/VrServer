@@ -1,8 +1,8 @@
-const NO_LOG = '--no-log';
+const NO_LOG = "--no-log";
 
 // The logger object which will be returned to from the module.
 let Logger = {
-    prefix: '[CrimeScene]',
+    prefix: "[CrimeScene]",
     enabled: true,
 
     // Log any number of value to the console.
@@ -25,7 +25,7 @@ let Logger = {
 // Expose the function which will setup and return the logger.
 module.exports = function () {
     if (process.argv.indexOf(NO_LOG) !== -1) {
-        Logger.log('Logging disabled');
+        Logger.log("Logging disabled");
         Logger.enabled = false;            
     } else {
         Logger.enabled = true;

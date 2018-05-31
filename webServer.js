@@ -1,26 +1,22 @@
 //Webserver
 exports.start = function(sessions) {
-    var express = require('express');
-    var morgan = require('morgan');
-    var cookieParser = require('cookie-parser');
-    var session = require('express-session');
-    var FileStore = require('session-file-store')(session);
+    var express = require("express");
+    var morgan = require("morgan");
+    var cookieParser = require("cookie-parser");
+    var session = require("express-session");
+    var FileStore = require("session-file-store")(session);
     var app = express();
-    var bodyParser = require('body-parser');
-    var multer = require('multer');
-    var upload = multer();
-    var request = require('request');
-    const path = require('path');
-    const routes = require('./routes');
-    const mongoose = require('mongoose');
-    const config = require('./config');
+    var bodyParser = require("body-parser");
+    const routes = require("./routes");
+    const mongoose = require("mongoose");
+    const config = require("./config");
 
     //activate libraries
-    app.use(morgan('short'));
+    app.use(morgan("short"));
     app.use(cookieParser());
     app.use(session({
-        name : 'connect.sid',
-        secret: 'asdasd',
+        name : "connect.sid",
+        secret: "asdasd",
         resave: true,
         store: new FileStore(),
         saveUninitialized: false,
@@ -29,17 +25,17 @@ exports.start = function(sessions) {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
 
-    app.use('/', routes);
+    app.use("/", routes);
 
-    app.get('/', function (req, res) {
+    app.get("/", function (req, res) {
         res.json(sessions.map(function (s) { return s.data; } ));
     });
 
     mongoose.connect(config.MONGO_CONFIG);
-    mongoose.set('debug', false);
+    mongoose.set("debug", false);
 
-    app.get('/availableApplications', function (req, res) {
-        res.send('not implemented yet');
+    app.get("/availableApplications", function (req, res) {
+        res.send("not implemented yet");
     });
 
     ////post request
@@ -51,6 +47,6 @@ exports.start = function(sessions) {
         var host = server.address().address;
         var port = server.address().port;
 	
-        console.log('Webserver at http://%s:%s', host, port);
+        console.log("Webserver at http://%s:%s", host, port);
     });
 };
