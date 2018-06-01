@@ -92,7 +92,7 @@ function buildData(dict, clientIds, prevData) {
     // Player position and rotation
     clientIds.forEach((localId) => {
         let clientUpdate = dict[localId];
-        data.addPlayer(clientUpdate.playerPosition, clientUpdate.playerRotation);
+        data.addPlayer(localId ,clientUpdate.playerPosition, clientUpdate.playerRotation);
     });
     
     return data;
@@ -121,8 +121,10 @@ function update() {
     let data = buildData(clientData, clientIds, previousInput);
     if (data !== null && data !== undefined) {
         previousInput = data;
-        console.log(data);
-        // TODO: send data to clients.
+        clients.forEach(client => {
+            let response = new Response(client.socket);
+            response.send(MESSAGES.UPDATE, data.toJson());
+        });
     }
 
     if (run) {
@@ -151,12 +153,13 @@ exports.start = function(sessions, jsonServer) {
         }
         inputBuffer.push(new Update(client, req.data));
 
-        clients.forEach(client => {
-            if (client.socket === req.socket) return;
+        // Deprecated
+        // clients.forEach(client => {
+        //     if (client.socket === req.socket) return;
 
-            let response = new Response(client.socket);
-            response.send(MESSAGES.UPDATE, req.data);
-        });
+        //     let response = new Response(client.socket);
+        //     response.send(MESSAGES.UPDATE, req.data);
+        // });
     });
 
     // A new client wants to connect to the crimeScene
