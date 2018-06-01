@@ -36,15 +36,6 @@ module.exports = class ServerUpdate {
     }
 
     toJson() {
-        const sample = {
-            count: 1,
-            playerCount: 2,
-            players:
-                "xT0DAFKvvkSbPq5Hg3gZRlKvvkSbPq5Hg3gZRlKvvkSbPq5Hg3gZRoN4GUY",
-            objects:
-                "xT0DAFKvvkSbPq5Hg3gZRlKvvkSbPq5Hg3gZRlKvvkSbPq5Hg3gZRoN4GUY"
-        };
-
         let obj = {
             count: this.count,
             playerCount: this.playerCount,

@@ -58,27 +58,31 @@ function buildData(dict, clientIds, prevData) {
     }
 
     let data = new ServerUpdate();
-    
+
     // Get a basic list of objects to loop through
     let baseData = dict[clientIds[0]].objects;
     for (let i = 0; i < baseData.length; i++) {
         let currentObject = baseData[i];
-    
+
         // If there is no previous input, just use the base object
-        if (prevData === null) {
+        if (prevData === null || prevData === undefined) {
             data.addObject(currentObject);
-        // If there was previous data compare the new data to the previous
+            // If there was previous data compare the new data to the previous
         } else {
             let prevObj = findObject(prevData.objects, currentObject.id);
             let diffObj = null;
+            if (prevObj !== null && prevObj !== undefined) {
+                for (let ii = 0; ii < clientIds.length; ii++) {
+                    let localObj = findObject(
+                        dict[clientIds[ii]].objects,
+                        currentObject.id
+                    );
 
-            for (let ii = 0; ii < clientIds.length; ii++) {
-                let localObj = findObject(dict[clientIds[ii]].objects, currentObject.id);
-
-                // If there is a difference just set it and stop the loop
-                if (!prevObj.compare(localObj)) {
-                    diffObj = localObj;
-                    break;
+                    // If there is a difference just set it and stop the loop
+                    if (!prevObj.compare(localObj)) {
+                        diffObj = localObj;
+                        break;
+                    }
                 }
             }
             if (diffObj === null) {
@@ -90,11 +94,15 @@ function buildData(dict, clientIds, prevData) {
     }
 
     // Player position and rotation
-    clientIds.forEach((localId) => {
+    clientIds.forEach(localId => {
         let clientUpdate = dict[localId];
-        data.addPlayer(localId ,clientUpdate.playerPosition, clientUpdate.playerRotation);
+        data.addPlayer(
+            localId,
+            clientUpdate.playerPosition,
+            clientUpdate.playerRotation
+        );
     });
-    
+
     return data;
 }
 
@@ -104,7 +112,7 @@ function update() {
     let clientIds = [];
     let clientData = {};
 
-    // Create a dictionary of the most recent 
+    // Create a dictionary of the most recent
     for (let i = clientInput.length - 1; i >= 0; i--) {
         let currentClient = clientInput[i].client;
         let currentId = currentClient.id.toString();
@@ -165,13 +173,13 @@ exports.start = function(sessions, jsonServer) {
     // A new client wants to connect to the crimeScene
     jsonServer.bind(MESSAGES.CLIENT, (req, res) => {
         let master = getMaster() ? false : true;
-        
+
         run = true;
         if (clients.length === 0) {
             update();
         }
-        
-        let client = new Client(req.socket, clientId++ ,master);
+
+        let client = new Client(req.socket, clientId++, master);
         clients.push(client);
 
         switch (state) {
