@@ -1,6 +1,16 @@
 const Node = require("./Node");
 const Logger = require("./logger")();
 
+function checkNumber(value) {
+    if (value === null || value === undefined) {
+        return 0;
+    }
+    if (Number.isNaN(value)) {
+        return 0;
+    }
+    return value;
+}
+
 module.exports = class Update {
     constructor(client, data) {
         this.client = client;
@@ -21,7 +31,8 @@ module.exports = class Update {
         try {
             let buff = Buffer.from(raw.playerPosition, "base64");
             for (let i = 0; i < 3; i++) {
-                this.playerPosition[i] = buff.readFloatLE(i * 4);
+                let res = buff.readFloatLE(i * 4);
+                this.playerPosition[i] = checkNumber(res);
             }
         } catch (error) {
             Logger.log(`Failed to get player position: ${error}`);
@@ -30,7 +41,8 @@ module.exports = class Update {
         try {
             let buffRot = Buffer.from(raw.playerRotation, "base64");
             for (let i = 0; i < 4; i++) {
-                this.playerRotation[i] = buffRot.readFloatLE(i * 4);
+                let res = buffRot.readFloatLE(i * 4);
+                this.playerRotation[i] = checkNumber(res);
             }
         } catch (error) {
             Logger.log(`Failed to get player rotation: ${error}`);
@@ -43,19 +55,21 @@ module.exports = class Update {
         for (let objIndex = 0; objIndex < this.count; objIndex++) {
             try {
                 // One object is 32 bytes
-                let id = buff.readInt32LE(objIndex * 32);
+                let res = buff.readInt32LE(objIndex * 32);
+                let id = checkNumber(res);
                 let pos = [0, 0, 0];
                 let rot = [0, 0, 0, 0];
 
                 // rotation (4 floats = 16 bytes)
                 for (let i = 0; i < 4; i++) {
-                    rot[i] = buff.readFloatLE((objIndex * 32) + 4 + (i * 4));
+                    let res = buff.readFloatLE((objIndex * 32) + 4 + (i * 4)); 
+                    rot[i] = checkNumber(res);
                 }
 
                 // pos (3 floats = 12 bytes)
                 for (let i = 0; i < 3; i++) {
-                    pos[i] = buff.readFloatLE((objIndex * 32) + 20 + (i * 4));
-                }
+                    let res = buff.readFloatLE((objIndex * 32) + 20 + (i * 4));
+                    pos[i] = checkNumber(res);                }
 
                 this.objects.push(new Node(id, pos, rot));
             } catch (error) {

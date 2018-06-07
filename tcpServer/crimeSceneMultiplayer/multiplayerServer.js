@@ -253,6 +253,7 @@ exports.start = function(sessions, jsonServer) {
             clients = [];
             state = STATES.IDLE;
             clientId = 0;
+            inputBuffer.splice(0, inputBuffer.length);
         }
     });
 };
