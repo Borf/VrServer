@@ -4,6 +4,7 @@ const Response = require("../Response");
 const Update = require("./Update");
 const Client = require("./Client");
 const ServerUpdate = require("./ServerUpdate");
+const JsonUpdate = require("./JsonUpdate");
 
 // Possible states the server can be in.
 const STATES = {
@@ -52,6 +53,44 @@ function findObject(list, id) {
     }
 }
 
+function compareObjects(obj1, obj2) {
+    if (obj1 === undefined || obj1 === null) {
+        return false;
+    } else if (obj2 === undefined || obj2 === null) {
+        return false;
+    }
+
+    const ALLOWED_ROT_DIFF = 0.001;
+    const ALLOWED_POS_DIFF = 0.001;
+
+    for (let i = 0; i < 4; i++) {
+        // Compare rotation
+        let rotDiff = obj1.rotation[i] - obj2.rotation[i];
+        if (rotDiff < 0) {
+            rotDiff *= -1;
+        }
+
+        if (rotDiff > ALLOWED_ROT_DIFF) {
+            return false;
+        }
+
+        // Compare position
+        if (i == 4) {
+            return true;
+        }
+        let posDiff = obj1.position[i] - obj2.position[i];
+        if (posDiff < 0) {
+            posDiff *= -1;
+        }
+
+        if (posDiff > ALLOWED_POS_DIFF) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function buildData(dict, clientIds, prevData) {
     if (clientIds.length === 0) {
         return null;
@@ -79,7 +118,7 @@ function buildData(dict, clientIds, prevData) {
                     );
                     if (localObj !== null && localObj !== undefined) {
                         // If there is a difference just set it and stop the loop
-                        if (!prevObj.compare(localObj)) {
+                        if (!compareObjects(localObj)) {
                             diffObj = localObj;
                             break;
                         }
@@ -160,15 +199,9 @@ exports.start = function(sessions, jsonServer) {
             Logger.log("CRITICAL: Couldn't find client!");
             return;
         }
-        inputBuffer.push(new Update(client, req.data));
-
-        // Deprecated
-        // clients.forEach(client => {
-        //     if (client.socket === req.socket) return;
-
-        //     let response = new Response(client.socket);
-        //     response.send(MESSAGES.UPDATE, req.data);
-        // });
+        let clientData = new JsonUpdate(client, req.data);
+        // let clientData = new Update(client, req.data);
+        inputBuffer.push(clientData);
     });
 
     // A new client wants to connect to the crimeScene
