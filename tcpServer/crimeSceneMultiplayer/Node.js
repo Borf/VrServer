@@ -4,8 +4,8 @@ const ALLOWED_POS_DIFF = 0.001;
 module.exports = class Node {
     constructor(id, position, rotation) {
         this.id = id;
-        this.position = position;
-        this.rotation = rotation;
+        this.position = position ? position : [0, 0, 0];
+        this.rotation = rotation ? rotation : [0, 0, 0, 0];
     }
 
     compare(other) {
@@ -19,7 +19,7 @@ module.exports = class Node {
             if (rotDiff > ALLOWED_ROT_DIFF) {
                 return false;
             }
-            
+
             // Compare position
             if (i == 4) {
                 return true;

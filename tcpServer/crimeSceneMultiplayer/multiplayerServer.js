@@ -77,11 +77,12 @@ function buildData(dict, clientIds, prevData) {
                         dict[clientIds[ii]].objects,
                         currentObject.id
                     );
-
-                    // If there is a difference just set it and stop the loop
-                    if (!prevObj.compare(localObj)) {
-                        diffObj = localObj;
-                        break;
+                    if (localObj !== null && localObj !== undefined) {
+                        // If there is a difference just set it and stop the loop
+                        if (!prevObj.compare(localObj)) {
+                            diffObj = localObj;
+                            break;
+                        }
                     }
                 }
             }
