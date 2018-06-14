@@ -23,6 +23,7 @@ module.exports = class ServerUpdate {
         this.playerCount = 0;
         this.objects = [];
         this.players = [];
+        this.previous = [];
     }
 
     addObject(obj) {
@@ -40,7 +41,8 @@ module.exports = class ServerUpdate {
             count: this.count,
             playerCount: this.playerCount,
             players: [],
-            objects: []
+            objects: [],
+            previous: this.previous
         };
 
         this.players.forEach((player) => {

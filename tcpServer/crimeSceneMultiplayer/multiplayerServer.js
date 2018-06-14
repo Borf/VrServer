@@ -143,6 +143,20 @@ function buildData(dict, clientIds, prevData) {
         );
     });
 
+    // Fill the previous list
+    previousInput.objects.forEach(previous => {
+        let present = false;
+        for (let i = 0; i < data.objects.length; i++) {
+            if (previous.id === data.objects[i].id) {
+                present = true;
+            }
+        }
+
+        if (!present) {
+            data.previous.push(previous);
+        }
+    });
+
     return data;
 }
 
