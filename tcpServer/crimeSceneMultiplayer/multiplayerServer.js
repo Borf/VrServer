@@ -35,6 +35,8 @@ let run = false;
 let previousInput = null;
 const inputBuffer = [];
 
+const clientsReceived = [];
+
 // Check if a master client is already present.
 function getMaster() {
     for (let i = 0; i < clients.length; i++) {
@@ -143,6 +145,10 @@ function buildData(dict, clientIds, prevData) {
         );
     });
 
+    if (previousInput === null || previousInput === undefined) {
+        return data;
+    }
+    
     // Fill the previous list
     previousInput.objects.forEach(previous => {
         let present = false;
@@ -161,6 +167,11 @@ function buildData(dict, clientIds, prevData) {
 }
 
 function update() {
+    if (clientsReceived.length < clients.length) {
+        return;
+    }
+    clientsReceived.splice(0, clientsReceived.length);
+
     // Get the lastest data, while clearing the buffer
     let clientInput = inputBuffer.splice(0, inputBuffer.length);
     let clientIds = [];
@@ -179,6 +190,7 @@ function update() {
             }
         }
     }
+
 
     let data = buildData(clientData, clientIds, previousInput);
     if (data !== null && data !== undefined) {
@@ -215,7 +227,11 @@ exports.start = function(sessions, jsonServer) {
         }
         let clientData = new JsonUpdate(client, req.data);
         // let clientData = new Update(client, req.data);
+        if (!clientsReceived.includes(client.id)) {
+            clientsReceived.push(client.id);
+        }
         inputBuffer.push(clientData);
+        update();
     });
 
     // A new client wants to connect to the crimeScene
