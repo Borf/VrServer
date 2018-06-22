@@ -1,6 +1,3 @@
-const Node = require("./Node");
-const Logger = require("./logger");
-
 class Player {
     constructor(id, position, rotation) {
         this.id = id;
@@ -23,6 +20,7 @@ module.exports = class ServerUpdate {
         this.playerCount = 0;
         this.objects = [];
         this.players = [];
+        this.players = [];
         this.previous = [];
     }
 
@@ -32,8 +30,12 @@ module.exports = class ServerUpdate {
     }
 
     addPlayer(id, position, rotation) {
-        this.players.push(new Player(id, position, rotation));
+        this.players.push(new Player(id.toString(), position, rotation));
         this.playerCount = this.players.length;
+    }
+
+    addPrevious(obj) {
+        this.previous.push(obj);
     }
 
     toJson() {
