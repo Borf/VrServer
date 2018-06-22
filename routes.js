@@ -22,7 +22,7 @@ _.forEach(versions, function(version) {
     let baseRouterPath = './' + version + '/';
 
     _.forEach(endpoints, function(endpoint) {
-        endpoint = endpoint.replace(/y\b/, "ie");
+        endpoint = endpoint.replace(/y\b/, 'ie');
 
         let path = basePath + endpoint;
         let routerPath = baseRouterPath + endpoint;
