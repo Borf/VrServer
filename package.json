@@ -2,10 +2,15 @@
   "name": "VrServer",
   "version": "0.0.0",
   "description": "VrServer",
-  "main": "app.js",
+  "main": "index.js",
   "author": {
     "name": "johan",
     "email": ""
+  },
+  "scripts": {
+    "start": "node index",
+    "start:tcp": "node index --no-web",
+    "start:web": "node index --no-tcp"
   },
   "dependencies": {
     "body-parser": "^1.17.2",
@@ -22,6 +27,6 @@
     "request": "^2.81.0",
     "session-file-store": "^1.1.2",
     "underscore": "^1.8.3",
-    "uuid": "^2.0.1"
+    "uuid": "^3.3.2"
   }
 }
